@@ -1,10 +1,14 @@
 package br.com.alura.literalura10.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 
-public class ConverteDados implements IConverteDados{
-    private ObjectMapper mapper =new ObjectMapper();
+import java.util.List;
+
+public class ConverteDados implements IConverteDados {
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public <T> T obterDados(String json, Class<T> classe) {
@@ -13,5 +17,26 @@ public class ConverteDados implements IConverteDados{
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public <T> List<T> obterLista(String json, Class<T> classe) {
+        CollectionType lista = mapper.getTypeFactory()
+                .constructCollectionType(List.class, classe);
+        try {
+            return mapper.readValue(json, lista);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public String descompacta(String json, String objeto) {
+        try {
+            JsonNode jsonCompactado = mapper.readTree(json);
+            JsonNode jsonLivro = jsonCompactado.path("results");
+            return jsonLivro.toString();
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+

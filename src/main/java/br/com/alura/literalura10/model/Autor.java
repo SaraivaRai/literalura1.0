@@ -3,6 +3,11 @@ package br.com.alura.literalura10.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.time.Year;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Entity
 @Table(name = "autores")
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,76 +16,45 @@ public class Autor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(unique = true)
+    private String nome;
 
-    private String autor;
+    private Year anoDeNascimento;
 
-    private Integer anoDeNascimento;
+    private Year anoDeFalecimento;
 
-    private Integer anoDeFalecimento;
-
-    @ManyToOne
-    private Livro livro;
+    @OneToMany(mappedBy = "autor", fetch = FetchType.EAGER)
+    private List<Livro> livros = new ArrayList<>();
 
     public Autor() {}
 
-    public Autor(DadosAutor dadosAutor, Livro livro) {
-        if (dadosAutor.autor().contains(",")) {
-            String[] autor = dadosAutor.autor().split(", ");
-            this.autor = autor[1] + " " + autor[0];
-        } else {
-            this.autor = dadosAutor.autor();
-        }
-        this.anoDeNascimento = dadosAutor.anoDeNascimento();
-        this.anoDeFalecimento = dadosAutor.anoDeFalecimento();
-        this.livro = livro;
-    }
+    public Autor(DadosAutor dadosAutor) {
+        this.nome = dadosAutor.nome();
+        this.anoDeNascimento = Year.of(dadosAutor.anoDeNascimento());
+        this.anoDeFalecimento = Year.of(dadosAutor.anoDeFalecimento());
+       }
 
-    public Integer getAnoDeFalecimento() {
-        return anoDeFalecimento;
-    }
-
-    public void setAnoDeFalecimento(Integer anoDeFalecimento) {
+    public Autor(String autor, Year anoDeNascimento, Year anoDeFalecimento) {
+        this.nome = nome;
+        this.anoDeNascimento = anoDeNascimento;
         this.anoDeFalecimento = anoDeFalecimento;
     }
 
-    public Integer getAnoDeNascimento() {
-        return anoDeNascimento;
-    }
-
-    public void setAnoDeNascimento(Integer anoDeNascimento) {
-        this.anoDeNascimento = anoDeNascimento;
-    }
-
-    public String getAutor() {
-        return autor;
-    }
-
-    public void setAutor(String autor) {
-        this.autor = autor;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Livro getLivro() {
-        return livro;
-    }
-
-    public void setLivro(Livro livro) {
-        this.livro = livro;
+    public String getNome() {
+        return nome;
     }
 
     @Override
     public String toString() {
         return
-                "autor='" + autor + '\'' +
-                        ", anoDeNascimento=" + anoDeNascimento +
-                        ", anoDeFalecimento=" + anoDeFalecimento;
-
+            "**************** AUTOR ****************" +
+                "\n nome = '" + nome + '\'' +
+                "\n anoDeNascimento = " + anoDeNascimento +
+                "\n anoDeFalecimento = " + anoDeFalecimento +
+                "\n Livros = " + livros.stream()
+                                    .map(l -> l.getTitulo())
+                               .collect(Collectors.toList()) +
+            "\n---------------------------------------";
     }
+
 }
